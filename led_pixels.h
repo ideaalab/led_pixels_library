@@ -92,17 +92,22 @@
 
 /* --------------------------------- VERSIONES --------------------------------
  * 
+ * v0.3.1 (15/Mayo/2017)
+ * -se suprime el numero de version del nombre del archivo .c y .h, ahora
+ * el control de versiones se hace con GIT
+ * -se aÃ±ade codigo de ejemplo en la carpeta demo
+ * 
  * v0.3 (23/Enero/2017)
  * -Se divide la libreria en un archivo .c y otro .h
  * -Se documenta mejor y se estandariza la forma de presentar los datos
- * -Se corrige la funcion SetBrightness(CambiarBrillo) que no funcionaba ¿?
+ * -Se corrige la funcion SetBrightness(CambiarBrillo) que no funcionaba Â¿?
  * -Se cambian nombres a algunas funciones y variables
  * -Se crea la funcion LlenarDeColor
  * -Se cambia la forma de usar el pin de datos
  * 
  * v0.2 (21/Abril/2014)
  * -Mejor manejo de la memoria
- * -Se añade posibilidad de  enviar datos a 400Khz o 800Khz
+ * -Se aÃ±ade posibilidad de  enviar datos a 400Khz o 800Khz
  * 
  * v0.1 (14/Abril/2014)
  * -Primera version
@@ -137,7 +142,7 @@
 #endif
 
 #ifndef PIX_PIN
-	#error "PIX_PIN no definido"
+	#ERROR "PIX_PIN no definido"
 #endif
 
 /* REGISTROS */
@@ -152,7 +157,7 @@
 #define PIX_NUM_BYTES	(PIX_NUM_LEDS * 3)
 
 /* COLORES BASICOS */
-//¡¡¡ Los colores cambian segun el voltaje que se aplique a los LEDs !!!
+//Â¡Â¡Â¡ Los colores cambian segun el voltaje que se aplique a los LEDs !!!
 #define PIX_NEGRO		0x000000	//negro
 #define PIX_ROJO		0xFF0000	//rojo
 #define PIX_NARANJA		0xFF6A00	//naranja

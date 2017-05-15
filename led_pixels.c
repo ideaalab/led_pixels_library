@@ -1,4 +1,4 @@
-#include <led_pixels_v0.3.h>
+#include <led_pixels.h>
 
 /*
  * Inicializa la libreria:
@@ -262,7 +262,7 @@ SendByte1:					//Clk	Instr
 		output_low(PIX_PIN);//2		1
 #asm
 	DECFSZ	i, F			//3		1	decrementar contador de bytes enviados, si es cero salta 1 -> listo.
-	GOTO	Salto1			//4		2	salta 1 instruccion (no me deja usar GOTO $+2 ni BRA 2 ¿?)
+	GOTO	Salto1			//4		2	salta 1 instruccion (no me deja usar GOTO $+2 ni BRA 2 Â¿?)
 	GOTO	Listo1			//5		2	todo enviado. Salir
 #endasm
 Salto1:
@@ -355,7 +355,7 @@ SendByte2:					//Clk	Instr
 	//delay_cycles(9);		//11-19	9
 #asm
 	DECFSZ	i, F			//11	1	decrementar contador de bytes enviados, si es cero salta 1 -> listo.
-	GOTO	Salto2			//12	2	salta 1 instruccion (no me deja usar GOTO $+2 ni BRA 2 ¿?)
+	GOTO	Salto2			//12	2	salta 1 instruccion (no me deja usar GOTO $+2 ni BRA 2 Â¿?)
 	GOTO	Listo2			//13	2	todo enviado. Salir
 #endasm
 Salto2:
