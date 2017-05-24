@@ -86,6 +86,22 @@ int32 Color32(int r, int g, int b){
 }
 
 /*
+ * Crea una "rueda de color" y segun el valor introducido (0-255)
+ * devuelve un color completo. El orden es R-G-B-R
+ */
+int32 Wheel(int WheelPos){
+	if(WheelPos < 85){
+		return Color32(255-WheelPos*3,WheelPos*3,0);
+	}else if(WheelPos < 170){
+		WheelPos -= 85;
+		return Color32(0,255-WheelPos*3,WheelPos*3);
+	}else{
+		WheelPos -= 170;
+		return Color32(WheelPos*3,0,255-WheelPos*3);
+	}
+}
+
+/*
  * Devuelve el color del pixel "n" en formato de 32bits y en order RGB
  */
 int32 GetPixelColor(int n){

@@ -1,5 +1,5 @@
 /* 
- * File:   led_pixels_v0.3.h
+ * File:   led_pixels.h
  * Author: Martin
  *
  * Created on 23 de enero de 2017, 20:52
@@ -92,6 +92,9 @@
 
 /* --------------------------------- VERSIONES --------------------------------
  * 
+ * v0.3.2 (24/Mayo/2017)
+ * -Se incluye la funcion Wheel
+ * 
  * v0.3.1 (15/Mayo/2017)
  * -se suprime el numero de version del nombre del archivo .c y .h, ahora
  * el control de versiones se hace con GIT
@@ -178,6 +181,7 @@ void InitPixels(void);
 void SetPixelColor(int n, int r, int g, int b);
 void SetPixelColor(int n, int32 c);
 int32 Color32(int r, int g, int b);
+int32 Wheel(int WheelPos);
 void CambiarBrillo(int b);
 void LlenarDeColor(int from, int to, int32 c);
 void MostrarPixels(void);
