@@ -210,8 +210,8 @@ int i;				//Loop
 	//empezar con el envio de datos
 	output_low(PIX_PIN);
 
-#ifndef PIX_400KHZ
-//Envio de datos a 800Khz
+#if (defined(PIX_800KHZ) || (getenv("CLOCK") == 16000000))
+//Envio de datos a 800Khz (32Mhz clock) o a 400Khz (16Mhz clock)
 //10 instrucciones por cada bit: HHxxxxxLLL
 //OUT instructions:              ^ ^    ^   (T=0,2,7)
 

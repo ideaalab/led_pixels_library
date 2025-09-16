@@ -124,28 +124,41 @@
 	//Libreria creada con compilador CCS v5.064
 	//Para versiones anteriores comprobar que el codigo
 	//generado se adecua a los tiempos requeridos
-   #WARNING "Compilador antiguo, comprueba que el codigo generado es valido"
+   #warning "Compilador antiguo, comprueba que el codigo generado es valido"
+#endif
+
+//si no se ha definido PIX_400KHZ funciona a 800KHZ por defecto
+#ifndef PIX_400KHZ
+#define PIX_800KHZ
 #endif
 
 #if getenv("CLOCK") != 32000000
 	//Necesitamos que el PIC corra a 32MHZ
-	#ERROR "La velocidad del PIC debe ser de 32Mhz"
-#endif
-
-#ifndef PIX_NUM_LEDS
-	#ERROR "PIX_NUM_LEDS no definido"
-#else
-	#if PIX_NUM_LEDS > 85
-		//Solo podemos usar un maximo de 85 leds.
-		//Cada led usa 3 bytes, y nuestro contador de envio es un INT
-		#ERROR "PIX_NUM_LEDS tiene que ser menor a 85"
-	#elif (PIX_NUM_LEDS*3) > getenv("RAM")
-		#ERROR Tu PIC no tiene suficiente RAM para tantos LEDs
+	#if getenv("CLOCK") != 16000000
+		#error "La velocidad del PIC debe ser de 16Mhz o 32Mhz"
+	#else
+		#ifdef PIX_800KHZ
+			#error "A 16Mhz solo puede enviar datos a 400Khz."
+		#else
+			#warning "Comprobar que los LEDs funcionan a 400Khz."
+		#endif
 	#endif
 #endif
 
 #ifndef PIX_PIN
-	#ERROR "PIX_PIN no definido"
+	#error "PIX_PIN no definido"
+#endif
+
+#ifndef PIX_NUM_LEDS
+	#error "PIX_NUM_LEDS no definido"
+#else
+	#if PIX_NUM_LEDS > 85
+		//Solo podemos usar un maximo de 85 leds.
+		//Cada led usa 3 bytes, y nuestro contador de envio es un INT
+		#error "PIX_NUM_LEDS tiene que ser menor a 85"
+	#elif (PIX_NUM_LEDS*3) > getenv("RAM")
+		#error "Tu PIC no tiene suficiente RAM para tantos LEDs"
+	#endif
 #endif
 
 /* REGISTROS */
