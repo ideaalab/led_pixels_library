@@ -132,17 +132,21 @@
 #define PIX_800KHZ
 #endif
 
-#if getenv("CLOCK") != 32000000
-	//Necesitamos que el PIC corra a 32MHZ
-	#if getenv("CLOCK") != 16000000
-		#error "La velocidad del PIC debe ser de 16Mhz o 32Mhz"
+#if getenv("CLOCK") == 48000000
+	//PIC corriendo a 48MHz (12MHz instruccion)
+	//Soporta 800KHz y 400KHz
+#elif getenv("CLOCK") == 32000000
+	//PIC corriendo a 32MHz (8MHz instruccion)
+	//Soporta 800KHz y 400KHz
+#elif getenv("CLOCK") == 16000000
+	//PIC corriendo a 16MHz (4MHz instruccion)
+	#ifdef PIX_800KHZ
+		#error "A 16Mhz solo puede enviar datos a 400Khz."
 	#else
-		#ifdef PIX_800KHZ
-			#error "A 16Mhz solo puede enviar datos a 400Khz."
-		#else
-			#warning "Comprobar que los LEDs funcionan a 400Khz."
-		#endif
+		#warning "Comprobar que los LEDs funcionan a 400Khz."
 	#endif
+#else
+	#warning "Velocidad no probada. Velocidades soportadas: 16MHz, 32MHz, 48MHz"
 #endif
 
 #ifndef PIX_PIN

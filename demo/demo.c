@@ -1,4 +1,4 @@
-#include <12F1840.h>
+#include <16F1825.h>
 #use delay(clock=32000000)    //clock de 32Mhz
 
 #FUSES INTRC_IO,NOWDT,PUT,NOMCLR,NOPROTECT,NOCPD,BROWNOUT_NOSL,NOCLKOUT,NOIESO,NOFCMEN,NOWRT,PLL_SW,NOSTVREN,BORV25,NODEBUG,NOLVP
@@ -28,8 +28,10 @@
 
 void main(void) {
 int i = 0;
+int colorPos = 0;
 
 	setup_oscillator(OSC_8MHZ|OSC_PLL_ON);	//configura oscilador interno
+	//setup_oscillator(OSC_16MHZ);			//configura oscilador interno
 	setup_wdt(WDT_OFF);						//configuracion wdt
 	setup_timer_0(T0_INTERNAL|T0_DIV_256);	//configuracion timer0
 	setup_timer_1(T1_DISABLED);				//configuracion timer1
@@ -39,14 +41,15 @@ int i = 0;
 	setup_ccp1(CCP_OFF);					//configura CCP
 	setup_spi(SPI_DISABLED);				//configura SPI
 	//setup_uart(FALSE);					//configura UART
-	setup_comparator(NC_NC);				//comparador apagado
+	setup_comparator(NC_NC_NC_NC);				//comparador apagado
 	setup_vref(VREF_OFF);					//no se usa voltaje de referencia
 	set_tris_a(TRIS_A);						//configura I/O
 	port_a_pullups(WPU_A);					//configura pullups
 	
 	InitPixels();	//inicializa pixels
 	
-	do{
+	//Ejemplo 1:
+	/*do{
 		if(BTN == PULSADO){
 			SetPixelColor(0, PIX_ROJO);
 			SetPixelColor(1, PIX_NARANJA);
@@ -60,5 +63,16 @@ int i = 0;
 			
 			while(BTN == PULSADO){delay_ms(20);}
 		}
+	}while(true);*/
+
+	//Ejemplo 2:
+	do{
+		for(i=0; i<PIX_NUM_LEDS; i++){
+			SetPixelColor(i, Wheel(colorPos +(i*16)));	//seteo color
+		}
+
+		colorPos = colorPos + 16;	//modifico valor
+		MostrarPixels();	//envio nuevos valores a la tira
+		delay_ms(100);
 	}while(true);
 }

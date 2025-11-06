@@ -7,9 +7,20 @@
  *	-Limpia los pixels
  */
 void InitPixels(void){
-#ifdef PIX_DELAY_TIMER2
 	//Configura timer para desbordar cada 50uS, pero no genera interrupcion
-	setup_timer_2(T2_DIV_BY_4, 99, 1);
+#ifdef PIX_DELAY_TIMER2
+	#if getenv("CLOCK") == 48000000
+		// Para 48 MHz: 48/4 = 12, divisor 4 → 3MHz, 3MHz*50us=150-1=149
+		setup_timer_2(T2_DIV_BY_4, 149, 1);
+	#elif getenv("CLOCK") == 32000000
+		// Para 32 MHz: 32/4 = 8, divisor 4 → 2MHz, 2MHz*50us=100-1=99
+		setup_timer_2(T2_DIV_BY_4, 99, 1);
+	#elif getenv("CLOCK") == 16000000
+		// Para 16 MHz: 16/4 = 4, divisor 4 → 1MHz, 1MHz*50us=50-1=49
+		setup_timer_2(T2_DIV_BY_4, 49, 1);
+	#else
+		#warning "Frecuencia no soportada en InitPixels para Timer2 50us"
+	#endif
 	disable_interrupts(INT_TIMER2);
 #endif
 	output_low(PIX_PIN);
@@ -210,8 +221,197 @@ int i;				//Loop
 	//empezar con el envio de datos
 	output_low(PIX_PIN);
 
-#if (defined(PIX_800KHZ) || (getenv("CLOCK") == 16000000))
+#if getenv("CLOCK") == 48000000
+// ==================== ENVIO DE DATOS A 48MHZ ====================
+
+#ifdef PIX_800KHZ
+//Envio de datos a 800Khz (48Mhz clock)
+//15 instrucciones por cada bit: HHHxxxxxxLLLLL
+//OUT instructions:              ^  ^     ^     (T=0,3,9)
+
+SendByte48_800:				//Clk	Instr
+	//bit7 ---
+	output_high(PIX_PIN);	//0		1
+	delay_cycles(1);		//1		1
+	if(!bit_test(INDF0, 7))	//2		1
+		output_low(PIX_PIN);//3		1
+	delay_cycles(5);		//4-8	5
+	output_low(PIX_PIN);	//9		1
+	delay_cycles(5);		//10-14	5
+	
+	//bit6 ---
+	output_high(PIX_PIN);	//0		1
+	delay_cycles(1);		//1		1
+	if(!bit_test(INDF0, 6))	//2		1
+		output_low(PIX_PIN);//3		1
+	delay_cycles(5);		//4-8	5
+	output_low(PIX_PIN);	//9		1
+	delay_cycles(5);		//10-14	5
+	
+	//bit5 ---
+	output_high(PIX_PIN);	//0		1
+	delay_cycles(1);		//1		1
+	if(!bit_test(INDF0, 5))	//2		1
+		output_low(PIX_PIN);//3		1
+	delay_cycles(5);		//4-8	5
+	output_low(PIX_PIN);	//9		1
+	delay_cycles(5);		//10-14	5
+	
+	//bit4 ---
+	output_high(PIX_PIN);	//0		1
+	delay_cycles(1);		//1		1
+	if(!bit_test(INDF0, 4))	//2		1
+		output_low(PIX_PIN);//3		1
+	delay_cycles(5);		//4-8	5
+	output_low(PIX_PIN);	//9		1
+	delay_cycles(5);		//10-14	5
+	
+	//bit3 ---
+	output_high(PIX_PIN);	//0		1
+	delay_cycles(1);		//1		1
+	if(!bit_test(INDF0, 3))	//2		1
+		output_low(PIX_PIN);//3		1
+	delay_cycles(5);		//4-8	5
+	output_low(PIX_PIN);	//9		1
+	delay_cycles(5);		//10-14	5
+	
+	//bit2 ---
+	output_high(PIX_PIN);	//0		1
+	delay_cycles(1);		//1		1
+	if(!bit_test(INDF0, 2))	//2		1
+		output_low(PIX_PIN);//3		1
+	delay_cycles(5);		//4-8	5
+	output_low(PIX_PIN);	//9		1
+	delay_cycles(5);		//10-14	5
+	
+	//bit1 ---
+	output_high(PIX_PIN);	//0		1
+	delay_cycles(1);		//1		1
+	if(!bit_test(INDF0, 1))	//2		1
+		output_low(PIX_PIN);//3		1
+	delay_cycles(5);		//4-8	5
+	output_low(PIX_PIN);	//9		1
+	delay_cycles(5);		//10-14	5
+	
+	//bit0 ---
+	output_high(PIX_PIN);	//0		1
+	delay_cycles(1);		//1		1
+	if(!bit_test(INDF0, 0))	//2		1
+		output_low(PIX_PIN);	//3		1
+	delay_cycles(5);		//4-8	5
+	output_low(PIX_PIN);	//9		1
+	
+#asm
+	DECFSZ	i, F			//10	1	decrementar contador de bytes enviados, si es cero salta 1 -> listo.
+	GOTO	Salto48_800		//11	2	salta 1 instruccion
+	GOTO	Listo48_800		//12	2	todo enviado. Salir
+#endasm
+Salto48_800:
+	FSR0L++;				//13	1	incrementar puntero
+	delay_cycles(1);		//14	1
+	goto SendByte48_800;	//0		2	vuelve al principio
+
+Listo48_800:	
+	delay_cycles(4);		//13-14	2
+	//Fin de transmision
+
+#else
+//Envio de datos a 400Khz (48Mhz clock)
+//30 instrucciones por cada bit: HHHHHHxxxxxxLLLLLLLLLLLLLLLL
+//OUT instructions:              ^     ^     ^               (T=0,6,12)
+
+SendByte48_400:				//Clk	Instr
+	//bit7 ---
+	output_high(PIX_PIN);	//0		1
+	delay_cycles(4);		//1-4	4
+	if(!bit_test(INDF0, 7))	//5		1
+		output_low(PIX_PIN);//6		1
+	delay_cycles(5);		//7-11	5
+	output_low(PIX_PIN);	//12		1
+	delay_cycles(17);		//13-29	17
+	
+	//bit6 ---
+	output_high(PIX_PIN);	//0		1
+	delay_cycles(4);		//1-4	4
+	if(!bit_test(INDF0, 6))	//5		1
+		output_low(PIX_PIN);//6		1
+	delay_cycles(5);		//7-11	5
+	output_low(PIX_PIN);	//12		1
+	delay_cycles(17);		//13-29	17
+	
+	//bit5 ---
+	output_high(PIX_PIN);	//0		1
+	delay_cycles(4);		//1-4	4
+	if(!bit_test(INDF0, 5))	//5		1
+		output_low(PIX_PIN);//6		1
+	delay_cycles(5);		//7-11	5
+	output_low(PIX_PIN);	//12		1
+	delay_cycles(17);		//13-29	17
+	
+	//bit4 ---
+	output_high(PIX_PIN);	//0		1
+	delay_cycles(4);		//1-4	4
+	if(!bit_test(INDF0, 4))	//5		1
+		output_low(PIX_PIN);//6		1
+	delay_cycles(5);		//7-11	5
+	output_low(PIX_PIN);	//12		1
+	delay_cycles(17);		//13-29	17
+	
+	//bit3 ---
+	output_high(PIX_PIN);	//0		1
+	delay_cycles(4);		//1-4	4
+	if(!bit_test(INDF0, 3))	//5		1
+		output_low(PIX_PIN);//6		1
+	delay_cycles(5);		//7-11	5
+	output_low(PIX_PIN);	//12		1
+	delay_cycles(17);		//13-29	17
+	
+	//bit2 ---
+	output_high(PIX_PIN);	//0		1
+	delay_cycles(4);		//1-4	4
+	if(!bit_test(INDF0, 2))	//5		1
+		output_low(PIX_PIN);//6		1
+	delay_cycles(5);		//7-11	5
+	output_low(PIX_PIN);	//12		1
+	delay_cycles(17);		//13-29	17
+	
+	//bit1 ---
+	output_high(PIX_PIN);	//0		1
+	delay_cycles(4);		//1-4	4
+	if(!bit_test(INDF0, 1))	//5		1
+		output_low(PIX_PIN);//6		1
+	delay_cycles(5);		//7-11	5
+	output_low(PIX_PIN);	//12		1
+	delay_cycles(17);		//13-29	17
+	
+	//bit0 ---
+	output_high(PIX_PIN);	//0		1
+	delay_cycles(4);		//1-4	4
+	if(!bit_test(INDF0, 0))	//5		1
+		output_low(PIX_PIN);	//6		1
+	delay_cycles(5);		//7-11	5
+	output_low(PIX_PIN);	//12		1
+	
+#asm
+	DECFSZ	i, F			//13	1	decrementar contador de bytes enviados, si es cero salta 1 -> listo.
+	GOTO	Salto48_400		//14	2	salta 1 instruccion
+	GOTO	Listo48_400		//15	2	todo enviado. Salir
+#endasm
+Salto48_400:
+	FSR0L++;				//16	1	incrementar puntero
+	delay_cycles(12);		//17-28	12
+	goto SendByte48_400;	//29		2	vuelve al principio
+
+Listo48_400:	
+	delay_cycles(16);		//14-29	16
+	//Fin de transmision
+
+#endif	//Fin de envio de datos a 48Mhz
+
+#elif (defined(PIX_800KHZ) || (getenv("CLOCK") == 16000000))
+// ==================== ENVIO DE DATOS A 32MHZ/16MHZ ====================
 //Envio de datos a 800Khz (32Mhz clock) o a 400Khz (16Mhz clock)
+//La secuencia de instrucciones es la misma en ambos casos
 //10 instrucciones por cada bit: HHxxxxxLLL
 //OUT instructions:              ^ ^    ^   (T=0,2,7)
 
@@ -292,7 +492,7 @@ Listo1:
 	//Fin de transmision
 	
 #else
-//Envio de datos a 400Khz
+//Envio de datos a 400Khz (32Mhz clock)
 //20 instrucciones por cada bit: HHHHxxxxxxLLLLLLLLLL
 //OUT instructions:              ^   ^     ^          (T=0,4,10)
 
