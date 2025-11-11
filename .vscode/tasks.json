@@ -1,0 +1,154 @@
+{
+  "version": "2.0.0",
+    
+  "tasks": [
+    {
+      "label": "- PICC Build -",
+      "type": "shell",
+      "command": "${config:ccs_path}",  // ruta al compilador CCS desde settings.json
+      "args": [
+        "${config:optimization_level}", // nivel de optimización desde settings.json
+        "+M",       // crear archivo .sym
+        "+T",       // árbol de llamadas .tre
+        "+A",       // estadísticas .sta
+        "+LY",      // listado simbólico
+        "-J",       // no crear .pjt
+        "-Z",       // no conservar temporales
+        "${config:ccs_target}",  // tipo de PIC desde settings.json
+        "+EA",      // mostrar todos los errores/warnings
+        //"+P02",     // mostrar ventana durante 2 segundos
+        "+STDOUT",  // errores por stdout para VSCode
+        "+O8hex",   // salida en hex
+        "out=${workspaceFolder}\\${config:build_folder}\\",          //directorio de archivos de compilacion
+        "${workspaceFolder}\\${config:source_file}.c" //archivo a compilar
+      ],
+      "presentation": {
+        "echo": true,
+        "revealProblems": "onProblem",
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": false,
+        "clear": true
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": [
+        {
+          "owner": "custom",
+          "fileLocation": [
+            "absolute"
+          ],
+          "pattern": {
+            "regexp": "^(.*):(\\d+):(\\d+):\\s+(Info|Error|Warning)#(\\d+)\\s+(.*)$",
+            "file": 1,
+            "line": 2,
+            "column": 3,
+            "severity": 4,
+            "code": 5,
+            "message": 6
+          }
+        },
+        {
+          "owner": "build-summary",
+          "fileLocation": [
+            "absolute"
+          ],
+          "severity": "info",
+          "pattern": {
+            "regexp": "^(Build.*|Memory usage:.*|.*Errors,.*Warnings.*)$",
+            "line": 1,
+            "column": 1,
+            "message": 0
+          }
+        }
+      ]
+    },
+    {
+      "label": "PICC Clean",
+      "type": "shell",
+      "command": "powershell",
+      "args": [
+        "-NoProfile",
+        "-Command",
+        "Remove-Item",
+        "-Path",
+        "${workspaceFolder}\\${config:build_folder}\\*",
+        "-Include",
+        "${fileBasenameNoExtension}.sym,${fileBasenameNoExtension}.cod,${fileBasenameNoExtension}.cof,${fileBasenameNoExtension}.err,${fileBasenameNoExtension}.esym,${fileBasenameNoExtension}.xsym,${fileBasenameNoExtension}.STA,${fileBasenameNoExtension}.tre",
+        "-Force",
+        "-ErrorAction",
+        "Continue"
+      ],
+      "presentation": {
+        "echo": true,
+        "revealProblems": "onProblem",
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": false
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": false
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "PICC SIOW Terminal",
+      "type": "shell",
+      "command": "${config:siow_path}",  // ruta al programa SIOW desde settings.json
+      "args": [""],
+      "problemMatcher": []
+    },
+    {
+      "label": "Programar con PICkit",
+      "type": "shell",
+      "command": "${config:pk2cmd_path}",         // ruta al programador PICkit2
+      "args": [
+        "-B${config:pk2cmd_devices_path}",        // ruta a la carpeta de dispositivos
+        "-PPIC${config:pic_model}",               // especifica el modelo de PIC a programar
+        "-F${workspaceFolder}\\${config:build_folder}\\${config:source_file}.hex",  // archivo hex a programar
+        "${config:pk2cmd_vdd_voltage}",           // voltaje VDD
+        "${config:pk2cmd_preserve_eeprom}",       // opción de preservar EEPROM
+        "-M",                                     // programar memoria
+        "-J",                                     // modo de programación rápida
+        "-R",                                     // resetear después de programar
+        "-T"                                      // encender el PIC después de programar
+      ],
+      "group": "build"
+    },
+    {
+      "label": "Programar con IPE",
+      "type": "shell",
+      "command": "${config:ipe_path}",            // ruta al programador IPE
+      "args": [
+        "${config:ipe_programmer}",               // tipo de programador
+        "-P${config:pic_model}",                  // modelo de PIC
+        "-F${workspaceFolder}\\${config:build_folder}\\${config:source_file}.hex",  // archivo hex a programar
+        "${config:ipe_erase_flash}",              // opción de borrado
+        "${config:ipe_vdd_voltage}",              // voltaje VDD
+        "${config:ipe_preserve_eeprom}",          // opción de preservar EEPROM
+        "-M",                                     // programar memoria
+        "-OAS2",                                  // velocidad de programación?
+        "-OL"                                     // mostrar log de operación?
+      ],
+      "group": "build"
+    },
+    {
+      "label": "Compilar y Programar",
+      "dependsOrder": "sequence",
+      "dependsOn": [
+        "- PICC Build -",
+        "Programar con PICkit"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": false
+      },
+      "problemMatcher": []
+    }
+  ]
+}

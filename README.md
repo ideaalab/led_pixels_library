@@ -17,10 +17,16 @@
 
 ---
 
+
+
 ## 🔧 Requisitos y Configuración
 
 - **Compilador**: CCS C v5.064 o superior.  
-- **Frecuencia del PIC**: 32 MHz (400Khz y 800Khz) o 16Mhz (400Khz).  
+- **Optimización**: Es imprescindible máxima optimización (`#pragma opt 9`) para que los timings sean correctos. Si el código no se optimiza, los LEDs pueden no funcionar correctamente.  
+- **Frecuencia del PIC**: 16, 24, 32 o 48 MHz.  
+  - **400KHz** disponible en todas las frecuencias (principalmente para WS2811).  
+  - **800KHz** solo disponible en 32MHz y 48MHz (recomendado para WS2812/WS2812B).  
+  - **Advertencia**: WS2812/WS2812B pueden no funcionar correctamente a 400KHz; se recomienda 800KHz y usar 32MHz o 48MHz para estos modelos.  
 - **RAM mínima**: `PIX_NUM_LEDS * 3` bytes (máximo 85 LEDs).  
 - **I/O rápido**: usar `#use fast_io(a)` para el puerto de datos.  
 - **Conexión**:  
@@ -45,7 +51,7 @@
 #define PIX_BLANCO      0xFFFFFF            // Blanco
 
 // Opciones de configuración (activar con #define):
-// - PIX_400KHZ         : transmisión a 400 kHz (legacy strips)
+// - PIX_400KHZ         : transmisión a 400 kHz (principalmente WS2811; WS2812/WS2812B pueden no funcionar)
 // - PIX_RGB            : orden de bytes RGB (por defecto GRB)
 // - PIX_DELAY_TIMER2   : usar Timer2 para el reset de 50 µs
 ```
@@ -107,11 +113,16 @@ void main() {
 
 ---
 
+
 ## 🛠️ Consejos y Buenas Prácticas
 
 - **Interrupciones**: al enviar datos se deshabilitan interrupciones; evítalas durante `MostrarPixels()`.  
 - **Brillo**: `CambiarBrillo()` reasigna valores en RAM, provocando pérdida de resolución. Para brillo dinámico sin pérdida, mantén un buffer “original” y uno “modificado”.  
-- **Tiempos**: asegúrate de usar FAST_IO, y comprueba los delays si cambias la frecuencia del CPU.  
+- **Tiempos y compatibilidad**: asegúrate de usar FAST_IO, y comprueba los delays si cambias la frecuencia del CPU.  
+- **Compatibilidad de velocidad**:  
+  - 400KHz: seguro para WS2811 en cualquier frecuencia soportada.  
+  - 800KHz: solo en 32MHz y 48MHz, recomendado para WS2812/WS2812B.  
+  - WS2812/WS2812B pueden no funcionar correctamente a 400KHz.  
 
 ---
 

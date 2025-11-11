@@ -1,0 +1,16 @@
+{
+    "configurations": [
+        {
+            "name": "PICC",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "C:\\Program Files (x86)\\PICC\\Devices",
+                "C:\\Program Files (x86)\\PICC\\Drivers"
+            ],
+            "defines": [
+
+            ]
+        }
+    ],
+    "version": 4
+}

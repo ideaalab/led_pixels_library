@@ -1,0 +1,31 @@
+{
+    "C_Cpp.errorSquiggles": "disabled",
+    "C_Cpp.codeAnalysis.clangTidy.checks.disabled": [
+        "clang-diagnostic-error"
+    ],
+
+    //configuracion general
+    "pic_model": "16F1825",     //chosen PIC model for CCS compiler and IPE programmer
+    "source_file": "demo",      //main source file !! WITHOUT EXTENSION
+    "build_folder": "build",    //build output folder
+
+    //configuration for CCS compiler
+    "ccs_path": "C:\\Program Files (x86)\\PICC\\ccscon.exe",    //path to comamand line CCS compiler
+    "siow_path": "C:\\Program Files (x86)\\PICC\\siow.exe",     //path to SIOW terminal program
+    "ccs_target": "+FM",            //CCS compiler target type (+FB: 12 bits, +FM: 14 bits, +FD: 16 bits, +FH: 18 bits)
+    "optimization_level": "+Y=9",   //optimization level (+Y=0: none, +Y=9: maximum)
+
+    //configuration for IPE programmer
+    "ipe_path": "C:\\Program Files\\Microchip\\MPLABX\\v6.20\\mplab_platform\\mplab_ipe\\ipecmd.exe", //path to IPE command line programmer
+    "ipe_programmer": "-TPPK4",     //chosen programmer type (-TPPK3: PICkit3, -TPPK4: PICkit4, -TPPK5: PICkit5, etc.)
+    "ipe_erase_flash": "-E",        //erase flash before programming ("-E" to enable, "" to disable)
+    "ipe_vdd_voltage": "-W5.0",     //VDD voltage level ("x.x" to set voltage, "" for vdd off)
+    "ipe_preserve_eeprom": "-Z0-FF", //preserve EEPROM memory during programming ("-Z" [change "0-FF" for desired range], "" to disable)
+
+    //configuration for Pickit2 programmer
+    "pk2cmd_path": "C:\\Program Files (x86)\\PICkitminus\\pk2cmd\\pk2cmd.exe", //path to PICkit2 command line programmer
+    "pk2cmd_devices_path": "C:\\Program Files (x86)\\PICkitminus\\pk2cmd", //path to PICkit2 devices folder
+    "pk2cmd_vdd_voltage": "-A5.0",   //VDD voltage level ("A"x.x to set voltage, "" for vdd off)
+    "pk2cmd_preserve_eeprom": "-Z" //preserve EEPROM memory during programming ("-Z" to enable, "" to disable)
+
+}

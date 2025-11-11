@@ -1,3 +1,6 @@
+// Es imprescindible máxima optimización para timings precisos en WS281x
+#pragma opt 9
+
 /* 
  * File:   led_pixels.h
  * Author: Martin
@@ -6,6 +9,12 @@
  */
 
 /* ------------------------------- INFORMACION --------------------------------
+ * IMPORTANTE: Esta librería requiere máxima optimización del compilador CCS C.
+ * Se fuerza con #pragma opt 9. Si no se optimiza, los tiempos de transmisión
+ * pueden ser incorrectos y los LEDs no funcionarán bien.
+ *
+ * Revisa que el compilador no esté en modo debug ni con optimización baja.
+ * ----------------------------------------------------------------------------
  * 
  *					WS2811 / WS2812 LED DRIVER
  * 
@@ -36,8 +45,10 @@
  * Definir la cantidad de LEDs a usar con "PIX_NUM_LEDS":
  * #define PIX_NUM_LEDS	20
  * 
- * Por defecto la libreria envia datos a 800Khz. Hay tiras de LED antiguas que no
- * soportan el envio de datos a 800Khz. Para enviar a 400Khz definir "PIX_400KHZ":
+ * Por defecto la libreria envia datos a 800Khz. El modo 400Khz (PIX_400KHZ) es 
+ * principalmente para LEDs WS2811. Los WS2812/WS2812B son más sensibles a los 
+ * timings y pueden no funcionar correctamente a 400Khz - se recomienda usar
+ * 800Khz para WS2812/WS2812B. Para forzar 400Khz (WS2811):
  * #define PIX_400KHZ
  * 
  * Depende del modelo de leds que estemos usando el orden de los colores
@@ -132,25 +143,32 @@
 #define PIX_800KHZ
 #endif
 
-#if getenv("CLOCK") == 48000000
-	//PIC corriendo a 48MHz (12MHz instruccion)
-	//Soporta 800KHz y 400KHz
-#elif getenv("CLOCK") == 32000000
-	//PIC corriendo a 32MHz (8MHz instruccion)
-	//Soporta 800KHz y 400KHz
-#elif getenv("CLOCK") == 16000000
-	//PIC corriendo a 16MHz (4MHz instruccion)
-	#ifdef PIX_800KHZ
-		#error "A 16Mhz solo puede enviar datos a 400Khz."
-	#else
-		#warning "Comprobar que los LEDs funcionan a 400Khz."
+
+#if (getenv("CLOCK") == 48000000) || (getenv("CLOCK") == 32000000) || (getenv("CLOCK") == 24000000) || (getenv("CLOCK") == 16000000)
+	//PIC corriendo a 16, 24, 32 o 48MHz
+	//Soporta 400KHz en todas (WS2811). 800KHz solo en 32/48MHz (WS2812/WS2812B)
+	#if defined(PIX_800KHZ) && ((getenv("CLOCK") == 24000000) || (getenv("CLOCK") == 16000000))
+		#error "A 16MHz y 24MHz solo puede enviar datos a 400KHz (WS2811). Para WS2812/WS2812B usar 32MHz o 48MHz (800KHz)"
+	#endif
+	#if defined(PIX_400KHZ)
+		#warning "Modo 400KHz: probado con WS2811. WS2812/WS2812B pueden no funcionar correctamente a 400KHz; se recomienda 800KHz y usar 32MHz o 48MHz para WS2812/WS2812B."
 	#endif
 #else
-	#warning "Velocidad no probada. Velocidades soportadas: 16MHz, 32MHz, 48MHz"
+	#warning "Velocidad no probada. Velocidades soportadas: 16MHz, 24MHz, 32MHz, 48MHz"
 #endif
 
-#ifndef PIX_PIN
-	#error "PIX_PIN no definido"
+#if (getenv("CLOCK") == 48000000) && defined(PIX_800KHZ)
+	#ifndef PIX_ASM_PORT
+		#error "ERROR: PIX_ASM_PORT no definido. Define: #define PIX_ASM_PORT 0x0E (reemplaza con la dirección correcta del puerto)"
+	#endif
+
+	#ifndef PIX_ASM_BIT
+		#error "ERROR: PIX_ASM_BIT no definido. Define: #define PIX_ASM_BIT 5 (reemplaza con el número de bit correcto)"
+	#endif
+#else
+	#ifndef PIX_PIN
+		#error "ERROR: PIX_PIN no definido"
+	#endif
 #endif
 
 #ifndef PIX_NUM_LEDS
